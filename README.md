@@ -69,16 +69,16 @@ Make sure Freighter Wallet is installed and connected to Testnet.
 
 ### Wallet Connected State
 
-(Add screenshot showing wallet connected)
-
+<img width="1919" height="949" alt="Screenshot 2026-02-13 141937" src="https://github.com/user-attachments/assets/699db781-626c-41ad-899e-1654890a66db" />
 
 ### Balance Displayed
 
-(Add screenshot showing XLM balance)
+<img width="1915" height="969" alt="Screenshot 2026-02-13 142120" src="https://github.com/user-attachments/assets/58a9e249-8770-4c29-bc33-16a7008810f7" />
+
 
 ### Successful Testnet Transaction
 
-(Add screenshot after sending XLM)
+
 
 ### Transaction Result Shown
 
