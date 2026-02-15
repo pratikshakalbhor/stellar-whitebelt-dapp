@@ -1,164 +1,156 @@
 import { useState } from "react";
 import "./App.css";
-import { setAllowed, getAddress } from "@stellar/freighter-api";
+import { getAddress, signTransaction } from "@stellar/freighter-api";
 import * as StellarSdk from "@stellar/stellar-sdk";
 
+
+
 function App() {
-  const [isConnected, setIsConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
-  const [balance, setBalance] = useState("0.00");
+  const [balance, setBalance] = useState("0");
   const [receiver, setReceiver] = useState("");
   const [amount, setAmount] = useState("");
   const [status, setStatus] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const server = new StellarSdk.Horizon.Server(
     "https://horizon-testnet.stellar.org"
   );
 
-  const handleConnectWallet = async () => {
-    try {
-      setStatus("Connecting to Freighter...");
-      setIsLoading(true);
+  const shortAddress = (addr) => {
+    if (!addr) return "";
+    return addr.slice(0, 6) + "..." + addr.slice(-6);
+  };
 
-      await setAllowed();
+  // CONNECT WALLET
+  const connectWallet = async () => {
+    try {
+      setLoading(true);
+      setStatus("Connecting to Freighter...");
+
       const { address } = await getAddress();
 
       setWalletAddress(address);
-      setIsConnected(true);
-      setStatus("Wallet connected");
+      setStatus("Wallet Connected");
 
-      // Fetch balance
       const account = await server.loadAccount(address);
-      const xlmBalance = account.balances.find(
-        (b) => b.asset_type === "native"
+      const xlm = account.balances.find((b) => b.asset_type === "native");
+
+      setBalance(parseFloat(xlm.balance).toFixed(2));
+    } catch (e) {
+      console.log(e);
+      setStatus("Freighter connection failed");
+    }
+
+    setLoading(false);
+  };
+
+  // SEND REAL PAYMENT
+  const sendPayment = async () => {
+    if (!walletAddress) {
+      setStatus("Connect wallet first");
+      return;
+    }
+
+    if (!receiver || !amount) {
+      setStatus("Enter receiver & amount");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setStatus("Preparing transaction...");
+
+      const account = await server.loadAccount(walletAddress);
+
+      const transaction = new StellarSdk.TransactionBuilder(account, {
+        fee: StellarSdk.BASE_FEE,
+        networkPassphrase: StellarSdk.Networks.TESTNET,
+      })
+        .addOperation(
+          StellarSdk.Operation.payment({
+            destination: receiver.trim(),
+            asset: StellarSdk.Asset.native(),
+            amount: amount.toString(),
+          })
+        )
+        .setTimeout(30)
+        .build();
+
+      const xdr = transaction.toXDR();
+
+      const signedXDR = await signTransaction(xdr, {
+        networkPassphrase: StellarSdk.Networks.TESTNET,
+      });
+
+      const signedTx = StellarSdk.TransactionBuilder.fromXDR(
+        signedXDR,
+        StellarSdk.Networks.TESTNET
       );
 
-      setBalance(parseFloat(xlmBalance.balance).toFixed(2));
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
-      setStatus("Freighter not found or permission denied");
-      setIsLoading(false);
-    }
-  };
+      const result = await server.submitTransaction(signedTx);
 
-  const handleDisconnect = () => {
-    setIsConnected(false);
-    setWalletAddress("");
-    setBalance("0.00");
-    setStatus("Wallet disconnected");
-  };
+      setStatus("Payment Success! Hash: " + result.hash);
 
-  const handleSendPayment = () => {
-    if (!receiver || !amount) {
-      setStatus(" Fill all fields");
-      return;
+      // refresh balance
+      const updated = await server.loadAccount(walletAddress);
+      const xlm = updated.balances.find((b) => b.asset_type === "native");
+      setBalance(parseFloat(xlm.balance).toFixed(2));
+
+      setAmount("");
+      setReceiver("");
+    } catch (e) {
+      console.log(e);
+      if (e.error === "User declined access" || e.message === "User declined access") {
+        setStatus("Transaction rejected by user");
+      } else {
+        setStatus("Transaction Failed");
+      }
     }
 
-    if (parseFloat(amount) <= 0) {
-      setStatus(" Amount must be greater than 0");
-      return;
-    }
-
-    setStatus("Transaction feature coming next...");
-  };
-
-  const truncateAddress = (address) => {
-    return address ? `${address.slice(0, 6)}...${address.slice(-6)}` : "";
+    setLoading(false);
   };
 
   return (
     <div className="app-container">
       <div className="card">
-        <div className="card-header">
-          <h1 className="title">Stellar Payment dApp</h1>
-          <p className="subtitle">Send XLM payments on Stellar Network</p>
-        </div>
+        <h1>Stellar Payment dApp</h1>
 
-        <div className="wallet-section">
-          {isConnected ? (
-            <>
-              <div className="status-badge connected">
-                <span className="status-dot"></span>
-                Connected
-              </div>
-
-              <div className="wallet-info">
-                <div className="info-group">
-                  <label className="info-label">Wallet Address</label>
-                  <div className="address-display">
-                    <span className="address-text">
-                      {truncateAddress(walletAddress)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="info-group">
-                  <label className="info-label">Available Balance</label>
-                  <div className="balance-display">
-                    <span className="balance-amount">{balance}</span>
-                    <span className="balance-symbol"> XLM</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                className="button button-secondary"
-                onClick={handleDisconnect}
-              >
-                Disconnect Wallet
-              </button>
-            </>
-          ) : (
-            <button
-              className="button button-primary"
-              onClick={handleConnectWallet}
-              disabled={isLoading}
-            >
-              {isLoading ? "Connecting..." : "Connect Wallet"}
-            </button>
-          )}
-        </div>
-
-        {isConnected && (
-          <div className="payment-section">
-            <div className="divider"></div>
-
-            <h2 className="section-title">Send Payment</h2>
-
-            <div className="form-group">
-              <label className="form-label">Receiver Address</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Enter Stellar address"
-                value={receiver}
-                onChange={(e) => setReceiver(e.target.value)}
-              />
+        {!walletAddress ? (
+          <button className="button button-primary" onClick={connectWallet} disabled={loading}>
+            {loading ? <><div className="spinner"></div> Connecting...</> : "Connect Wallet"}
+          </button>
+        ) : (
+          <>
+            <div className="status-badge connected">
+              <span className="status-dot"></span>
+              Wallet: {shortAddress(walletAddress)}
             </div>
+            <h2>{balance} XLM</h2>
 
-            <div className="form-group">
-              <label className="form-label">Amount</label>
-              <input
-                type="number"
-                className="form-input"
-                placeholder="Enter amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-            </div>
+            <input
+              className="form-input"
+              placeholder="Receiver Address"
+              value={receiver}
+              onChange={(e) => setReceiver(e.target.value)}
+            />
+            <br />
 
-            <button
-              className="button button-primary button-large"
-              onClick={handleSendPayment}
-            >
-              Send XLM
+            <input
+              className="form-input"
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <br />
+
+            <button className="button button-primary" onClick={sendPayment} disabled={loading}>
+              {loading ? <><div className="spinner"></div> Sending...</> : "Send XLM"}
             </button>
-          </div>
+          </>
         )}
 
-        {status && <div className="status-message">{status}</div>}
+        <p className="status-message">{status}</p>
       </div>
     </div>
   );

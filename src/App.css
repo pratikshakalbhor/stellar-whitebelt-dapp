@@ -226,6 +226,9 @@ body {
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .button:hover:not(:disabled) {
@@ -417,4 +420,65 @@ body {
   .balance-amount {
     font-size: 24px;
   }
+}
+
+/* Transaction History */
+.history-section {
+  margin-top: 24px;
+  border-top: 1px solid rgba(102, 126, 234, 0.2);
+  padding-top: 20px;
+  width: 100%;
+}
+
+.history-section h3 {
+  font-size: 16px;
+  color: #667eea;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.transaction-item a {
+  color: #333;
+  text-decoration: none;
+  font-family: monospace;
+}
+
+.tx-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.tx-date {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.sent { color: #e65100; font-weight: bold; }
+.received { color: #2e7d32; font-weight: bold; }
+
+/* Loading Spinner */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
