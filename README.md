@@ -34,13 +34,13 @@ The goal of this project is to learn basic wallet connection, balance handling, 
 1. Clone the repository:
 
 ```
-git clone <your-repo-link>
+git clone https://github.com/pratikshakalbhor/stellar-whitebelt-dapp.git
 ```
 
 2. Open the project folder:
 
 ```
-cd your-project-folder-name
+cd stellar-new
 ```
 
 3. Install dependencies:
@@ -73,16 +73,18 @@ Make sure Freighter Wallet is installed and connected to Testnet.
 
 ### Balance Displayed
 
-<img width="1915" height="969" alt="Screenshot 2026-02-13 142120" src="https://github.com/user-attachments/assets/58a9e249-8770-4c29-bc33-16a7008810f7" />
-
+<img width="1913" height="953" alt="Screenshot 2026-02-15 201203" src="https://github.com/user-attachments/assets/4ed1d4c9-58cb-4a7f-afec-04bff8ad659e" />
 
 ### Successful Testnet Transaction
-
+<img width="1916" height="655" alt="Screenshot 2026-02-15 201624" src="https://github.com/user-attachments/assets/c14c97a2-fcd8-4e4d-baf4-9f0a64ceca38" />
 
 
 ### Transaction Result Shown
 
-(Add screenshot showing success message / transaction hash)
+<img width="1889" height="656" alt="Screenshot 2026-02-15 201730" src="https://github.com/user-attachments/assets/e6b2ef78-ee48-4636-9a1c-24e8a99038cc" />
+<img width="645" height="872" alt="image" src="https://github.com/user-attachments/assets/e32664ba-1f93-4cf4-b40d-55bce1e964c7" />
+
+
 
 ---
 
@@ -97,8 +99,4 @@ From this project I learned:
 
 ---
 
-## Author
-
-B.Sc. Blockchain Technology Student
-Learning Blockchain, Web3, and Smart Contract Development.
 
