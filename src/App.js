@@ -12,6 +12,11 @@ function App() {
   const [amount, setAmount] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // NFT Mint Section
+  const [nftName, setNftName] = useState("");
+  const [nftStatus, setNftStatus] = useState("");
+  const [nftLoading, setNftLoading] = useState(false);
 
   const server = new StellarSdk.Horizon.Server(
     "https://horizon-testnet.stellar.org"
@@ -57,14 +62,20 @@ function App() {
       return;
     }
 
+    if (!StellarSdk.StrKey.isValidEd25519PublicKey(receiver)) {
+      setStatus("Invalid receiver address");
+      return;
+    }
+
     try {
       setLoading(true);
       setStatus("Preparing transaction...");
 
       const account = await server.loadAccount(walletAddress);
+      const fee = await server.fetchBaseFee();
 
       const transaction = new StellarSdk.TransactionBuilder(account, {
-        fee: StellarSdk.BASE_FEE,
+        fee: fee.toString(),
         networkPassphrase: StellarSdk.Networks.TESTNET,
       })
         .addOperation(
@@ -80,14 +91,21 @@ function App() {
       const xdr = transaction.toXDR();
 
       const signedXDR = await signTransaction(xdr, {
+        network: "TESTNET",
         networkPassphrase: StellarSdk.Networks.TESTNET,
       });
 
+      // Handle potential object return from Freighter
+      const signedXDRString = typeof signedXDR === 'object' && signedXDR.signedTxXdr 
+        ? signedXDR.signedTxXdr 
+        : signedXDR;
+
       const signedTx = StellarSdk.TransactionBuilder.fromXDR(
-        signedXDR,
+        signedXDRString,
         StellarSdk.Networks.TESTNET
       );
 
+      setStatus("Submitting transaction...");
       const result = await server.submitTransaction(signedTx);
 
       setStatus("Payment Success! Hash: " + result.hash);
@@ -100,15 +118,47 @@ function App() {
       setAmount("");
       setReceiver("");
     } catch (e) {
-      console.log(e);
-      if (e.error === "User declined access" || e.message === "User declined access") {
-        setStatus("Transaction rejected by user");
+      console.error(e);
+      if (e.response && e.response.data && e.response.data.extras) {
+        const codes = e.response.data.extras.result_codes;
+        setStatus(`Failed: ${codes.transaction || ""} ${codes.operations ? codes.operations.join(",") : ""}`);
+      } else if (e.message) {
+        setStatus(`Error: ${e.message}`);
       } else {
         setStatus("Transaction Failed");
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // MINT NFT (UI Only - No Smart Contract Logic)
+  const mintNft = async () => {
+    if (!walletAddress) {
+      setNftStatus("Connect wallet first");
+      return;
     }
 
-    setLoading(false);
+    if (!nftName) {
+      setNftStatus("Enter NFT name");
+      return;
+    }
+
+    try {
+      setNftLoading(true);
+      setNftStatus("Pending");
+      
+      // UI Only - Simulating minting process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setNftStatus("Success");
+      setNftName("");
+    } catch (e) {
+      console.log(e);
+      setNftStatus("Failed");
+    }
+
+    setNftLoading(false);
   };
 
   return (
@@ -150,7 +200,19 @@ function App() {
           </>
         )}
 
-        <p className="status-message">{status}</p>
+        {status && (
+          <p
+            className={`status-message ${
+              status.includes("Success")
+                ? "success"
+                : status.includes("Failed") || status.includes("Error")
+                ? "warning"
+                : "info"
+            }`}
+          >
+            {status}
+          </p>
+        )}
       </div>
     </div>
   );
