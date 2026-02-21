@@ -56,7 +56,6 @@ The app allows users to:
 * Successful transaction status
   <img width="1868" height="992" alt="Screenshot 2026-02-16 144051" src="https://github.com/user-attachments/assets/663b97e3-591f-4c40-9518-103297f76a96" />
 
-
 ## 📂 Project Structure
 
 src/
@@ -151,16 +150,18 @@ Freighter wallet installed
 Testnet selected in Freighter
 Account funded via Friendbot
 
-## 📸 Screenshots
-Wallet connection
+##📸 Screenshots
+
+### Wallet Connection
+
 <img width="1864" height="970" alt="Screenshot 2026-02-21 152022" src="https://github.com/user-attachments/assets/ec550ea6-6ded-4613-aba7-015d60b40f16" />
 
 
-Successful mint and Transaction hash visible
+### Successful Mint and Transaction Hash Visible
 <img width="1873" height="953" alt="Screenshot 2026-02-21 152046" src="https://github.com/user-attachments/assets/b122d9ba-25a2-4948-a451-ab05374bdc20" />
 
 
-Explorer verification
+### Explorer Verification
 <img width="1908" height="967" alt="Screenshot 2026-02-21 152139" src="https://github.com/user-attachments/assets/689501ee-5412-47c5-9e67-5c670a09c799" />
 
 
@@ -171,4 +172,5 @@ Explorer verification
 ✔ Contract called from frontend
 ✔ Transaction status visible
 ✔ Verifiable transaction hash
+
 
