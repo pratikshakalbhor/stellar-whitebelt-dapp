@@ -6,12 +6,14 @@ import * as StellarSdk from "@stellar/stellar-sdk";
 import NavBar from "./components/navBar";
 import PaymentPage from "./pages/PaymentPage";
 import MintPage from "./pages/MintPage";
+import GalleryPage from "./pages/GalleryPage";
 
 function App() {
   const [walletAddress, setWalletAddress] = useState("");
   const [balance, setBalance] = useState("0");
   const [loading, setLoading] = useState(false);
   const [connectStatus, setConnectStatus] = useState("");
+  const [nfts, setNfts] = useState([]);
 
   const server = useMemo(
     () => new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org"),
@@ -57,11 +59,6 @@ function App() {
 
   return (
     <div className="app-container">
-      <div className="particles">
-        {[...Array(25)].map((_, i) => (
-          <span key={i}></span>
-        ))}
-      </div>
       {!walletAddress ? (
         <div className="card">
           <h1 className="title">Stellar Payment dApp</h1>
@@ -99,9 +96,11 @@ function App() {
                   walletAddress={walletAddress}
                   server={server}
                   setBalance={setBalance}
+                  setNfts={setNfts}
                 />
               }
             />
+            <Route path="/gallery" element={<GalleryPage nfts={nfts} />} />
           </Routes>
         </>
       )}

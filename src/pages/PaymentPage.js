@@ -52,6 +52,12 @@ export default function PaymentPage({ walletAddress, balance, setBalance, server
         networkPassphrase: StellarSdk.Networks.TESTNET,
       });
 
+      if (!signedXDR) {
+        setStatus("Transaction Cancelled by User");
+        setLoading(false);
+        return;
+      }
+
       // Freighter might return the XDR string directly or an object { signedTxXdr: ... }
       const signedXDRString = typeof signedXDR === 'object' && signedXDR.signedTxXdr 
         ? signedXDR.signedTxXdr 
@@ -81,7 +87,18 @@ export default function PaymentPage({ walletAddress, balance, setBalance, server
       setAmount("");
     } catch (e) {
       console.error(e);
-      setStatus(`Failed: ${e.message || e.toString() || "Transaction failed"}`);
+
+      const message = (e?.message || "").toLowerCase();
+
+      if (
+        message.includes("rejected") ||
+        message.includes("declined") ||
+        message.includes("cancel")
+      ) {
+        setStatus("Transaction Cancelled by User");
+      } else {
+        setStatus("Transaction Failed");
+      }
     } finally {
       setLoading(false);
     }

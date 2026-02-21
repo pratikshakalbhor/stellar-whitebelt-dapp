@@ -1,17 +1,16 @@
 import { useState } from "react";
 import "./MintPage.css";
-import { getImageById, getValidImageIds } from "../utils/imageMap";
-import { mintNFT } from "../utils/soroban";
+import { getValidImageIds } from "../utils/imageMap";
+import { mintNFT, fetchNFTs } from "../utils/soroban";
 
 
 
-const MintPage = ({ walletAddress, server, setBalance }) => {
+const MintPage = ({ walletAddress, server, setBalance, setNfts, nfts }) => {
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [statusType, setStatusType] = useState("info"); // 'info', 'success', 'warning'
-  const [lastMintedNft, setLastMintedNft] = useState(null);
   const [txHash, setTxHash] = useState("");
 
   const fetchBalance = async () => {
@@ -27,7 +26,6 @@ const MintPage = ({ walletAddress, server, setBalance }) => {
   };
 
   const handleMint = async () => {
-    setLastMintedNft(null);
     setTxHash("");
     if (!name || !imageUrl) {
       setStatus("Please enter a name and image ID.");
@@ -47,18 +45,35 @@ const MintPage = ({ walletAddress, server, setBalance }) => {
     setStatusType("info");
 
     try {
-      // Use the utility function which handles Symbol conversion and simulation
       const result = await mintNFT(walletAddress, name, imageUrl.trim().toUpperCase());
 
-      setStatus(`NFT Minted ✅ ${result.hash.slice(0, 8)}...`);
+      if (result.status === "CANCELLED") {
+        setStatus("User Cancelled Transaction");
+        setStatusType("warning");
+        setLoading(false);
+        return;
+      }
+
+      if (result.status === "FAILED") {
+        setStatus("Transaction Failed");
+        setStatusType("warning");
+        setLoading(false);
+        return;
+      }
+
+      setStatus(`NFT Minted ✅ ${result.hash.substring(0, 8)}...`);
       setStatusType("success");
       setTxHash(result.hash);
-      setLastMintedNft({ name: name.trim(), imageUrl: imageUrl.trim().toUpperCase() });
+      
+      // Fetch updated NFTs from blockchain instead of local update
+      const updatedNfts = await fetchNFTs(walletAddress);
+      setNfts(updatedNfts);
+
       setName("");
       setImageUrl("");
       await fetchBalance(); // Refresh balance after successful mint
     } catch (e) {
-      setStatus(e.message);
+      setStatus(e?.message || "Transaction failed.");
       setStatusType("warning");
     } finally {
       setLoading(false);
@@ -107,18 +122,6 @@ const MintPage = ({ walletAddress, server, setBalance }) => {
           >
             View on Explorer
           </a>
-        </div>
-      )}
-
-      {lastMintedNft && (
-        <div className="nft-preview-card">
-          <h2 className="preview-title">Your New NFT!</h2>
-          <img
-            src={getImageById(lastMintedNft.imageUrl)}
-            alt={lastMintedNft.name}
-            className="preview-image"
-          />
-          <p className="preview-name">{lastMintedNft.name}</p>
         </div>
       )}
     </div>

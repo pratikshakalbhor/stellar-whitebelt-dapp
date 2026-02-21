@@ -2,10 +2,8 @@
 
 use soroban_sdk::{contract, contractimpl, symbol_short, Address, Env, Symbol};
 
-// --- STORAGE KEYS ---
-// This contract uses a combination of a single instance-level key (`TOTAL`)
-// and dynamic keys for each NFT's data. Dynamic keys are created by combining
-// a base Symbol (like `OWNER`) with the NFT's unique ID.
+//  dynamic keys for each NFT's data. Dynamic keys are created by combining
+// a base Symbol (like OWNER) with the NFT's unique ID.
 
 // Key for storing the total number of NFTs minted. A single u32 value.
 const TOTAL: Symbol = symbol_short!("TOTAL");
@@ -41,10 +39,10 @@ impl NFTContract {
         let nft_id = total;
 
         // --- Store NFT Data ---
-        // We use a tuple `(Symbol, u32)` as a dynamic key. This is an efficient and safe
+        // We use a tuple (Symbol, u32) as a dynamic key. This is an efficient and safe
         // way to create unique storage keys for each piece of data related to an NFT.
 
-        // Store the owner for this NFT ID. Key: `("OWNER", 1)`, Value: `owner_address`
+        // Store the owner for this NFT ID. Key: ("OWNER", 1), Value: owner_address
         env.storage()
             .instance()
             .set(&(OWNER, nft_id), &owner);
