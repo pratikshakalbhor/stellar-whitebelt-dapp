@@ -69,6 +69,7 @@ src/
 * Balance display ✔
 * Send XLM ✔
 * Transaction status ✔
+---
 
 
 
@@ -130,30 +131,8 @@ View on Explorer:
 https://stellar.expert/explorer/testnet/tx/ebb7e0c1b8acc05169fcd8446e015bfb4c940e01ff39e98071543a0a8bc7ffb5
 
 ---
-
-## ⚙ Setup Instructions
-
-### 1️⃣ Clone repository
-
-```bash
-git clone https://github.com/pratikshakalbhor/stellar-payment-nft-dapp    
-cd stellar-new
-
-2️⃣ Install dependencies
-npm install
-
-3️⃣ Start frontend
-npm start
-
-4️⃣ Requirements
-Freighter wallet installed
-Testnet selected in Freighter
-Account funded via Friendbot
-
-##📸 Screenshots
-
+## 📸 Screenshots
 ### Wallet Connection
-
 <img width="1864" height="970" alt="Screenshot 2026-02-21 152022" src="https://github.com/user-attachments/assets/ec550ea6-6ded-4613-aba7-015d60b40f16" />
 
 
@@ -172,5 +151,6 @@ Account funded via Friendbot
 ✔ Contract called from frontend
 ✔ Transaction status visible
 ✔ Verifiable transaction hash
+
 
 
